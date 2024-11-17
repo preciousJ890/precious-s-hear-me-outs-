@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precious's Hear Me Outs</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sour+Gummy&display=swap" rel="stylesheet">
+
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Sour Gummy', sans-serif;
+            background-color: #ffe4e1;
+            color: #333;
+            text-align: center;
+        }
+
+        #start-button, #start-rating-button {
+            background-color: #007BFF;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #start-button:hover, #start-rating-button:hover {
+            background-color: #0056b3;
+        }
+
+        #account-section, #game-section, #results-section {
+            display: none;
+            padding: 50px;
+        }
+
+        .account-input {
+            font-size: 18px;
+            padding: 10px;
+            margin: 10px;
+            border: 2px solid #d63384;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .account-profile {
+            margin-top: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #6a4c9c;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .slider {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px;
+            margin-top: 30px;
+            scroll-snap-type: x mandatory;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .image-container {
+            flex: 0 0 80%;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 2px solid #d63384;
+            border-radius: 10px;
+            background-color: #fff;
+            scroll-snap-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .buttons {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .rate-button {
+            font-size: 14px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .real { background-color: #4CAF50; color: white; }
+        .umm { background-color: #FFC107; color: white; }
+        .not-valid { background-color: #FF5252; color: white; }
+
+        .real.selected { background-color: #2e8b57; }
+        .umm.selected { background-color: #ff8c00; }
+        .not-valid.selected { background-color: #ff0000; }
+
+        .instruction {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: #333;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .accounts-list {
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .account-box {
+            width: 250px;
+            height: auto;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .account-circle {
+            width: 50px;
+            height: 50px;
+            background-color: #6a4c9c;
+            border: 2px solid #d63384;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .account-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .account-ratings {
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Welcome Page -->
+<div id="welcome-section">
+    <h1>Welcome to Precious's Hear Me Outs! Have fun rating them</h1>
+    <button id="start-button">Start!</button>
+</div>
+
+<!-- Account Creation Page -->
+<div id="account-section">
+    <h2>Create Your Account</h2>
+    <input type="text" id="username" class="account-input" placeholder="Enter your name">
+    <button id="start-rating-button">Start Rating</button>
+</div>
+
+<!-- Game Section -->
+<div id="game-section">
+    <div class="account-info" id="account-info">
+        <div class="account-profile" id="account-profile"></div>
+        <span id="account-name"></span>
+    </div>
+
+    <div class="slider" id="slider"></div>
+
+    <div class="buttons">
+        <button id="next-button" style="display:none; font-size: 24px; padding: 15px 30px;">Next</button>
+    </div>
+
+    <div class="summary" id="summary"></div>
+</div>
+
+<!-- Results Section -->
+<div id="results-section">
+    <h2>Other Users' Ratings</h2>
+    <div class="accounts-list" id="accounts-list"></div>
+</div>
+
+<script>
+    const images = [
+    { url: "https://i.pinimg.com/736x/9b/87/a9/9b87a990d05fc474d9b33a7b85c25bbf.jpg", title: "Kuzco from 'The Emperor's New Groove'" },
+    { url: "https://i.pinimg.com/736x/14/a8/6b/14a86b3e6319644340d06d465466cb8b.jpg", title: "Human version of Megamind from 'Megamind'" },
+    { url: "https://i.pinimg.com/736x/1e/46/83/1e4683b316b4edc48ad1674bdd8a161c.jpg", title: "The Nutcracker from 'Barbie in the Nutcracker'" },
+    { url: "https://i.pinimg.com/736x/40/59/1a/40591a82acc523079d263dd9653ec95b.jpg", title: "Original Nesquik bunny" },
+    { url: "https://i.pinimg.com/736x/01/27/f8/0127f883d26217fdf8f07c669df10023.jpg", title: "Snufkin from 'Moomin Valley'" },
+    { url: "https://i.pinimg.com/736x/43/c6/da/43c6dad2f230f91065728693078b380a.jpg", title: "Victor from 'Leap'" },
+    { url: "https://i.pinimg.com/736x/b2/72/5f/b2725f1caa4365532bcedf832edcb498.jpg", title: "Pato from 'Pocoyo' (i was 8)" },
+    { url: "https://i.pinimg.com/736x/ce/19/39/ce1939cd2995ffba02169e2d66efd8d9.jpg", title: "Man in the yellow hat from 'Curious George Movie'" },
+    { url: "https://i.pinimg.com/736x/68/d9/32/68d932870c219abd3fe9c26e3879ed9c.jpg", title: "Prince Alexander from 'Veggietales'" },
+    { url: "https://i.pinimg.com/736x/c6/14/a0/c614a0d82efef8b6615bb469845bf81d.jpg", title: "Mariano Guzman from 'Encanto'" },
+    { url: "https://i.pinimg.com/736x/99/08/75/990875773d064588ade80cddf85a9dc1.jpg", title: "Ben 10" },
+    { url: "https://i.pinimg.com/736x/08/12/e1/0812e199fa62a46cbf443545cd7ee606.jpg", title: "Milo from 'Atlantis:The Lost Empire'" },
+    { url: "https://i.pinimg.com/736x/46/8a/5f/468a5f93367c44b906e8eadc602ea906.jpg", title: "BEAST BOY (all versions tbh)" },
+    { url: "https://i.pinimg.com/736x/73/b9/ad/73b9ad478286770523794c8f72b9170e.jpg", title: "Cole from Ninjago" },
+    { url: "https://i.pinimg.com/736x/14/3d/71/143d7191b7cd7ffc5942847bde3f2d27.jpg", title: "Tramp from 'The Lady and the Tramp'" },
+    { url: "https://i.pinimg.com/736x/97/06/eb/9706eb7a1089d6ceed826c98cfc36d51.jpg", title: "Marco from 'Star Vs forces of evil'" },
+    { url: "https://i.pinimg.com/736x/88/45/2e/88452edbfcef965ff7b6d7b85c0514b1.jpg", title: "Q*Bert from 'Wreck it Ralph'" },
+    { url: "https://i.pinimg.com/736x/e4/19/be/e419be1065ff35fc6e98a0fcd51ab89f.jpg", title: "Ashitaka from 'Princess Mononoke'" },
+    { url: "https://i.pinimg.com/736x/60/e3/38/60e338c45b255123b550332eac8bf9b4.jpg", title: "Kick Buttowski" },
+    { url: "https://i.pinimg.com/736x/8b/25/70/8b2570a8602b5458516d93b62ab272b5.jpg", title: "Selenia from 'Arthur and the Invisibles'" },
+    { url: "https://i.pinimg.com/736x/6e/2b/e4/6e2be41d9da7591fe07660b1e6506b2c.jpg", title: "Audrey from 'Atlantis: The Lost Empire'" },
+    { url: "https://i.pinimg.com/736x/ab/e0/3f/abe03f6f660c59380f07b44728b1dbb7.jpg", title: "Hiccup and Astrid from 'How to train your Dragon'" },
+    { url: "https://i.pinimg.com/736x/4a/84/2a/4a842aaa285db30f31af181dc4afd0be.jpg", title: "Kovu from Lion King" },
+    { url: "https://i.pinimg.com/736x/d7/1a/ea/d71aea1ee9c167790deae43782c9e01d.jpg", title: "Astro Boy" },
+    { url: "https://i.pinimg.com/736x/a6/c7/f5/a6c7f5682b01fc06c83e1017cd36f358.jpg", title: "Jim from 'Treasure Planet'" },
+    { url: "https://i.pinimg.com/736x/3c/da/51/3cda5184c0eff287e89acd5aadfff90e.jpg", title: "Jacob from 'The Sea Beast'" },
+    { url: "https://i.pinimg.com/736x/f9/c5/a6/f9c5a6b8561e4d1e6905806b9e2f8ae5.jpg", title: "Moses from 'The Prince of Egypt'" },
+    { url: "https://i.pinimg.com/736x/ce/1a/73/ce1a731f79a104a8831cc2cd22c81dac.jpg", title: "Larry Boy from 'Veggietales'" },
+    { url: "https://i.pinimg.com/736x/e4/ae/92/e4ae924e190d1a284656297f0b516c4a.jpg", title: "Wild Krats Bros" },
+    { url: "https://i.pinimg.com/736x/ec/ae/10/ecae100a6cce4d47512d9dc8ddc0d2a9.jpg", title: "Bananas in Pajamas" },
+    { url: "https://i.pinimg.com/736x/5d/06/f2/5d06f24e9177e0ad29800f3bfd330b59.jpg", title: "Alfred Hedgehog" }
+
+    ];
+
+    let username = '';
+    let ratings = [];
+    let currentImageIndex = 0;
+    let users = [];
+
+    // Event listener to start game page
+    document.getElementById("start-button").addEventListener("click", function() {
+        document.getElementById("welcome-section").style.display = "none";
+        document.getElementById("account-section").style.display = "block";
+    });
+
+    // Event listener to handle account creation
+    document.getElementById("start-rating-button").addEventListener("click", function() {
+        username = document.getElementById("username").value;
+        if (!username) {
+            alert("Please enter a name");
+            return;
+        }
+
+        document.getElementById("account-section").style.display = "none";
+        document.getElementById("game-section").style.display = "block";
+
+        document.getElementById("account-name").textContent = username;
+        document.getElementById("account-profile").style.backgroundColor = '#6a4c9c';
+
+        renderSlider();
+    });
+
+    // Render images one by one
+    function renderSlider() {
+        const slider = document.getElementById("slider");
+        const currentImage = images[currentImageIndex];
+
+        const container = document.createElement("div");
+        container.classList.add("image-container");
+
+        const title = document.createElement("h3");
+        title.textContent = currentImage.title;
+        container.appendChild(title);  // Add title above image
+
+        const img = document.createElement("img");
+        img.src = currentImage.url;
+        img.alt = currentImage.title;
+        container.appendChild(img);
+
+        const buttonsDiv = document.createElement("div");
+        buttonsDiv.classList.add("buttons");
+
+        const realButton = createRatingButton("Real", "real");
+        const ummButton = createRatingButton("Umm", "umm");
+        const notValidButton = createRatingButton("Not Valid", "not-valid");
+
+        buttonsDiv.appendChild(realButton);
+        buttonsDiv.appendChild(ummButton);
+        buttonsDiv.appendChild(notValidButton);
+
+        container.appendChild(buttonsDiv);
+        slider.innerHTML = ''; // Clear previous images
+        slider.appendChild(container);
+
+        // Next button functionality
+        document.getElementById("next-button").style.display = "inline-block";
+        document.getElementById("next-button").onclick = function() {
+            currentImageIndex++;
+            if (currentImageIndex < images.length) {
+                renderSlider();
+            } else {
+                document.getElementById("game-section").style.display = "none";
+                document.getElementById("results-section").style.display = "block";
+                renderResults();
+            }
+        };
+    }
+
+    function createRatingButton(text, type) {
+        const button = document.createElement("button");
+        button.textContent = text;
+        button.classList.add("rate-button", type);
+        button.onclick = function() {
+            button.classList.add("selected");
+            ratings.push(type);
+        };
+        return button;
+    }
+
+    function renderResults() {
+        const accountsList = document.getElementById("accounts-list");
+        accountsList.innerHTML = ""; // Clear previous results
+
+        // Add current user and their rating to the list
+        const userBox = document.createElement("div");
+        userBox.classList.add("account-box");
+
+        const userCircle = document.createElement("div");
+        userCircle.classList.add("account-circle");
+        userBox.appendChild(userCircle);
+
+        const userName = document.createElement("div");
+        userName.classList.add("account-name");
+        userName.textContent = username;
+        userBox.appendChild(userName);
+
+        const ratingsBox = document.createElement("div");
+        ratingsBox.classList.add("account-ratings");
+        ratingsBox.innerHTML = `
+            Real: ${ratings.filter(r => r === "real").length} <br>
+            Umm: ${ratings.filter(r => r === "umm").length} <br>
+            Not Valid: ${ratings.filter(r => r === "not-valid").length}
+        `;
+        userBox.appendChild(ratingsBox);
+
+        accountsList.appendChild(userBox);
+
+        // Add other users
+        users.forEach(user => {
+            const userBox = document.createElement("div");
+            userBox.classList.add("account-box");
+
+            const userCircle = document.createElement("div");
+            userCircle.classList.add("account-circle");
+            userBox.appendChild(userCircle);
+
+            const userName = document.createElement("div");
+            userName.classList.add("account-name");
+            userName.textContent = user.name;
+            userBox.appendChild(userName);
+
+            const ratingsBox = document.createElement("div");
+            ratingsBox.classList.add("account-ratings");
+            ratingsBox.innerHTML = `
+                Real: ${user.ratings.filter(r => r === "real").length} <br>
+                Umm: ${user.ratings.filter(r => r === "umm").length} <br>
+                Not Valid: ${user.ratings.filter(r => r === "not-valid").length}
+            `;
+            userBox.appendChild(ratingsBox);
+
+            accountsList.appendChild(userBox);
+        });
+    }
+
+    // Store user data
+    function saveUserData() {
+        users.push({ name: username, ratings });
+    }
+</script>
+
+</body>
+</html>
+
+
+
